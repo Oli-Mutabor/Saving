@@ -2,32 +2,34 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class Main {
     public static void main(String[] args) {
-        GameProgress save1 = new GameProgress(100, 10000, 1, 5);
-        GameProgress save2 = new GameProgress(60, 8000, 2, 15);
-        GameProgress save3 = new GameProgress(80, 4000, 3, 25);
 
-        saveGame("C://Games/savegames/save1.dat", save1);
-        saveGame("C://Games/savegames/save2.dat", save2);
-        saveGame("C://Games/savegames/save3.dat", save3);
+        GameProgress[] gameProgress = {
+                new GameProgress(100, 10000, 1, 5),
+                new GameProgress(60, 8000, 2, 15),
+                new GameProgress(80, 4000, 3, 25)
+        };
 
-        String[] saveGames = {"C://Games/savegames/save1.dat",
-                "C://Games/savegames/save2.dat",
-                "C://Games/savegames/save3.dat"};
+        List<String> fileDirs = new ArrayList<>();
 
-        zipFiles("C://Games/savegames/zip.zip", saveGames);
+        for (int i = 0; i < gameProgress.length; i++) {
+            String fileDir = "C://Games/savegames/save" + (i + 1) + ".dat";
+            fileDirs.add(fileDir);
+            saveGame(fileDir, gameProgress[i]);
+        }
 
-        File save1File = new File("C://Games/savegames/save1.dat");
-        File save2File = new File("C://Games/savegames/save2.dat");
-        File save3File = new File("C://Games/savegames/save3.dat");
-        save1File.delete();
-        save2File.delete();
-        save3File.delete();
+        zipFiles("C://Games/savegames/zip.zip", fileDirs);
 
+        for (String fileDir : fileDirs) {
+            File file = new File(fileDir);
+            file.delete();
+        }
     }
 
     public static void saveGame(String dir, GameProgress gp) {
@@ -39,11 +41,10 @@ public class Main {
         }
     }
 
-    public static void zipFiles(String zipDir, String[] fileDirs) {
-
+    public static void zipFiles(String zipDir, List<String> fileDirs) {
         try (ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(zipDir))) {
-            for (int i = 0; i < fileDirs.length; i++) {
-                FileInputStream fis = new FileInputStream(fileDirs[i]);
+            for (int i = 0; i < fileDirs.size(); i++) {
+                FileInputStream fis = new FileInputStream(fileDirs.get(i));
                 ZipEntry entry = new ZipEntry("save" + (i + 1) + ".txt");
                 zout.putNextEntry(entry);
                 byte[] buffer = new byte[fis.available()];
